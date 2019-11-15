@@ -63,6 +63,7 @@ if __name__ == '__main__':
     fold_idx = 1
     ave_full_knn = 0.0
     ave_full_svm = 0.0
+    ave_full_loec = 0.0
     ave_sel_knn = 0.0
     ave_sel_svm = 0.0
     ave_time = 0.0
@@ -91,6 +92,7 @@ if __name__ == '__main__':
         # classifier = LinearOEC(np.shape(data_array)[1], optimizer='cmaes',regularization=0.0,
         #                        initialization=model.coef_[0], iterations=10)
         classifier.fit(X_train, y_train)
+        loec_acc = balanced_accuracy_score(y_test, classifier.predict(X_test))
         exe_time = time.time() - start_time
         W = np.abs(classifier.weights)
         f_selected = np.argsort(W)[::-1][:no_select]
@@ -112,6 +114,7 @@ if __name__ == '__main__':
         knn.fit(X_train_sel, y_train)
         knn_sel_acc = balanced_accuracy_score(y_test, knn.predict(X_test_sel))
         knn_sel_train_acc = balanced_accuracy_score(y_train, knn.predict(X_train_sel))
+        to_print += 'Full LOEC: %f \n' % loec_acc
         to_print += 'Full train KNN: %f \n' % knn_full_train_acc
         to_print += 'Sel train KNN: %f \n' % knn_sel_train_acc
         to_print += 'Full KNN: %f \n' % knn_full_acc
@@ -136,13 +139,16 @@ if __name__ == '__main__':
         ave_sel_knn += knn_sel_acc
         ave_sel_svm += svm_sel_acc
         ave_time += ave_time
+        ave_full_loec += loec_acc
 
     ave_sel_svm /= no_folds
     ave_sel_knn /= no_folds
     ave_full_svm /= no_folds
     ave_full_knn /= no_folds
     ave_time /= no_folds
+    ave_full_loec /= no_folds
 
+    print(str(ave_full_loec))
     to_print += '***********************************Final results*****************************\n'
     to_print += 'Full SVM: %f \n' % ave_full_svm
     to_print += 'Sel SVM: %f \n' % ave_sel_svm
